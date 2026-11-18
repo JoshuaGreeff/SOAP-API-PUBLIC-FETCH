@@ -48,6 +48,27 @@ def validate_integer(value: Any, field_name: str) -> int:
     return number
 
 
+def validate_soap_result(value: Any) -> int:
+    """Check that the SOAP result is the integer value this operation promises."""
+    # AddInteger is defined in the WSDL to return xsd:long. Checking the returned
+    # value demonstrates validation of data coming back from the public service.
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise RuntimeError(
+            "SOAP response validation failed. AddIntegerResult must be a whole number. "
+            f"Received: {value!r}"
+        )
+
+    minimum_result = MINIMUM_NUMBER * 2
+    maximum_result = MAXIMUM_NUMBER * 2
+    if not minimum_result <= value <= maximum_result:
+        raise RuntimeError(
+            "SOAP response validation failed. AddIntegerResult is outside the "
+            f"expected range {minimum_result} through {maximum_result}. Received: {value}"
+        )
+
+    return value
+
+
 def add_with_soap(arg1: Any, arg2: Any, soap_client: Client | None = None) -> dict[str, Any]:
     """Validate two values, call the public AddInteger operation, and return JSON-ready data."""
     first_number = validate_integer(arg1, "arg1")
@@ -68,10 +89,12 @@ def add_with_soap(arg1: Any, arg2: Any, soap_client: Client | None = None) -> di
         # The same custom-plus-original-error pattern helps if the public service is down.
         raise RuntimeError(f"Unexpected SOAP client error. Service details: {exc}") from exc
 
+    checked_result = validate_soap_result(native_result)
+
     return {
         "operation": "AddInteger",
         "inputs": {"arg1": first_number, "arg2": second_number},
-        "result": native_result,
+        "result": checked_result,
     }
 
 

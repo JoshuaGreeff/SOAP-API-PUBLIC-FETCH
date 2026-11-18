@@ -2,6 +2,8 @@
 
 from unittest.mock import Mock
 
+import pytest
+
 from app import app, add_with_soap
 
 
@@ -23,6 +25,15 @@ def test_get_rejects_out_of_range_number() -> None:
 
     assert response.status_code == 400
     assert "must be between" in response.get_json()["error"]
+
+
+def test_rejects_invalid_soap_result() -> None:
+    """A response outside the expected result range becomes a clear service error."""
+    fake_client = Mock()
+    fake_client.service.AddInteger.return_value = 30_000
+
+    with pytest.raises(RuntimeError, match="response validation failed"):
+        add_with_soap(7, 35, soap_client=fake_client)
 
 
 def test_post_requires_json_object() -> None:
