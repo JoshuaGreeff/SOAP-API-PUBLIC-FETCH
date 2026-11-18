@@ -18,7 +18,8 @@ The service runs at `http://127.0.0.1:5000`.
 ```powershell
 curl.exe "http://127.0.0.1:5000/add?arg1=7&arg2=35"
 
-curl.exe -X POST 'http://127.0.0.1:5000/add' -H 'Content-Type: application/json' -d '{"arg1":7,"arg2":35}'
+# PowerShell's --% tells it to pass the JSON quotation marks through to curl.exe.
+curl.exe --% -X POST http://127.0.0.1:5000/add -H Content-Type:application/json -d {"arg1":7,"arg2":35}
 ```
 
 Both values must be whole numbers from -10,000 through 10,000.
