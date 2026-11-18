@@ -1,0 +1,6 @@
+# Keep the local virtual environment, test cache, and Python bytecode out of Git.
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+
